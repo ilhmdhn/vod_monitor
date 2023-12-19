@@ -1,10 +1,12 @@
 const fs = require('fs').promises;
 const path = require('path');
+const {getPreferences} = require('./configuration');
 
-const cekFiles = (urlFile, outletCode) => {
+const cekFiles = () => {
     return new Promise(async (resolve, reject)=>{
         try {
-            const folderPath = `\\\\${urlFile}\\vod\\RoomInfo`;  
+            const preferences = getPreferences()
+            const folderPath = `\\\\${preferences.serverIp}\\vod\\RoomInfo`;  
             const files = await fs.readdir(folderPath);
             const fileInfo = [];
         
@@ -73,7 +75,7 @@ const cekFiles = (urlFile, outletCode) => {
                   fileProperty.detail.room_close_time = dateTimeConverter(isiFile.RoomCloseTime);
                 }
                 fileProperty.detail.file_name = iniFile;
-                fileProperty.detail.outlet = outletCode;
+                fileProperty.detail.outlet = preferences.outletCode;
                 fileProperty.detail.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
                 
                 fileInfo.push(fileProperty)
