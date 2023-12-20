@@ -5,7 +5,6 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win=portable --ia32",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "build": {
@@ -15,7 +14,7 @@
       "output": "dist"
     },
     "win": {
-      "icon":"./page/music.png",
+      "icon": "./page/music.png",
       "target": [
         {
           "target": "portable",
@@ -25,13 +24,14 @@
         }
       ]
     }
-  },  
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.2",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "smb2": "^0.2.11"
   },
   "devDependencies": {
     "electron": "^22.0.0",
