@@ -1,10 +1,25 @@
-const { app, BrowserWindow, Tray, ipcMain } = require('electron');
+const { app, BrowserWindow, Tray, ipcMain, Menu } = require('electron');
 const {setPreferences, getPreferences} = require('./src/configuration');
 const startUpload = require('./src/timer-upload');
+const path = require('path')
 
 const createWindow = async() =>{
     const additionalData = { myKey: 'VOD_MONITOR' }
     const gotTheLock = app.requestSingleInstanceLock(additionalData);
+
+    const win = new BrowserWindow({
+        width: 544,
+        height: 540,
+        show: true,
+        icon: path.join(__dirname, '/page/music.png'),
+        title: "Song Optimizer",
+        autoHideMenuBar: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        },
+        enableRemoteModule: true
+    });
 
     if (!gotTheLock) {
         win == null;
@@ -15,22 +30,9 @@ const createWindow = async() =>{
         return;
     }
 
-    const win = new BrowserWindow({
-        width: 544,
-        height: 540,
-        // show: true,
-        icon: './icon.png',
-        title: "Self Checkin Server",
-        autoHideMenuBar: true,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        },
-        enableRemoteModule: true
-    });
-
     win.loadFile('./page/index.html');
-    
+    win.focus();
+    win.center();
     win.on('closed', (event) => {
         event.preventDefault();
         win.hide();
@@ -46,6 +48,40 @@ const createWindow = async() =>{
         win.hide();
     });
 
+    const iconTray = path.join(__dirname, '/page/music.png');
+    const tray = new Tray(iconTray);
+    tray.on('click', () => {
+        if (win.isVisible()) {
+            win.hide();
+        } else {
+            win.show();
+        }
+    });
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Show',
+            click: () => {
+                if (win.isVisible()) {
+                    win.hide();
+                } else {
+                    win.show();
+                }
+            }
+        },
+        {
+            label: 'Quit',
+            click: () => {
+                app.isQuiting = true;
+                app.quit();
+                win.close();
+                app.exit();
+                return
+            }
+        }
+    ]);
+
+    tray.setTitle("Song Optimizer");
+    tray.setContextMenu(contextMenu);
     startUpload()
 
     win.webContents.on('did-finish-load', ()=>{

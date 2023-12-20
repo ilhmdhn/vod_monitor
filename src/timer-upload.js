@@ -14,7 +14,6 @@ const executeUpload = async()=>{
     try {
         const configuration = getPreferences()
         if(!configuration.outletCode || !configuration.serverIp){
-            console.log('return')
             return;
         }
         const files = await getFiles()
@@ -36,10 +35,8 @@ const executeUpload = async()=>{
                 'authorization': config.auth
             },
         }
-            const httpResponse = await axios.post(config.url, body,httpOptions)
-    
-            console.log(httpResponse.data)
-        } catch (err) {
+            await axios.post(config.url, body,httpOptions)
+            } catch (err) {
             console.log(err);
         }
     isProcess = false;
@@ -51,7 +48,7 @@ const startUpload = () =>{
         if(!isProcess){
             executeUpload()
         }
-    }, 10000)
+    }, 3600000)
 }
 
 module.exports = startUpload;

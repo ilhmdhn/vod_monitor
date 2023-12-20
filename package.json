@@ -1,12 +1,31 @@
 {
-  "name": "vod_monitor",
+  "name": "song_optimizer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Vod 1 opimizer",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder --win=portable --ia32",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "appId": "com.ihp.song_optimizer",
+    "productName": "Song Optimizer",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon":"./page/music.png",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    }
+  },  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,7 +34,7 @@
     "electron-store": "^8.1.0"
   },
   "devDependencies": {
-    "electron": "^26.2.4",
-    "electron-builder": "^24.6.4"
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0"
   }
 }
