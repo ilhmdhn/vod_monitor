@@ -51,10 +51,10 @@ const cekFiles = () => {
           const isiFile = convertDataFile(await smbClient.readFile(filePath, 'utf8'));
 
           // Fungsi untuk mengonversi tanggal dan waktu
-          const dateTimeConverter = (dateTimeString) => {
-            // Tambahkan logika konversi sesuai kebutuhan
-            return dateTimeString; // Contoh: kembalikan string datetime tanpa perubahan
-          };
+          // const dateTimeConverter = (dateTimeString) => {
+          //   // Tambahkan logika konversi sesuai kebutuhan
+          //   return dateTimeString; // Contoh: kembalikan string datetime tanpa perubahan
+          // };
 
           fileProperty.detail = {
             ...fileProperty.detail,
@@ -69,10 +69,15 @@ const cekFiles = () => {
             room_open_time: dateTimeConverter(isiFile.RoomOpenTime) || null,
             room_close_time: dateTimeConverter(isiFile.RoomCloseTime) || null,
           };
-
-          fileInfo.push(fileProperty);
-        } catch (readErr) {
-          console.error('Error reading file:', readErr);
+          if(fileProperty.detail.room_no){
+            fileInfo.push(fileProperty);
+          }
+        } catch (err) {
+          reject({
+            'Name': err.name,
+            'Messagge': err.message,
+            'Stack': err.stack,
+          });
         }
       }
 
@@ -80,7 +85,11 @@ const cekFiles = () => {
 
       resolve(fileInfo);
     } catch (err) {
-      reject(err);
+      reject({
+        'Name': err.name,
+        'Messagge': err.message,
+        'Stack': err.stack,
+      });
     }
   });
 };
@@ -125,7 +134,11 @@ const convertDataFile = (files) => {
   
       return result;
     } catch (err) {
-      throw err;
+      reject({
+        'Name': err.name,
+        'Messagge': err.message,
+        'Stack': err.stack,
+      });
     }
   }
   
