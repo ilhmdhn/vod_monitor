@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Tray, ipcMain, Menu } = require('electron');
-const {setPreferences, getPreferences} = require('./src/configuration');
+const {setOutlet, getPreferences} = require('./src/configuration');
 const startUpload = require('./src/timer-upload');
+const {testServer} =require('./src/read_file');
 const path = require('path')
 
 const createWindow = async() =>{
@@ -88,11 +89,8 @@ const createWindow = async() =>{
         showConfig()
     });
 
-    ipcMain.on('SEND-CONFIG', async(event, data)=>{
-        setPreferences({
-            serverIp: data.ipAddress,
-            outletCode: data.outletCode
-        });
+    ipcMain.on('SEND-CONFIG', async(event, outletCode)=>{
+        setOutlet(outletCode);
         win.webContents.send('SHOW-SETTING', {
             ip: '',
             outlet: ''
@@ -100,6 +98,18 @@ const createWindow = async() =>{
         await sleep(1000);
         showConfig()
     });
+
+    ipcMain.on('SERVER-CHECK', async(event, ipAddress)=>{
+        try {
+            console.log(ipAddress)
+            await testServer(ipAddress)
+            win.webContents.send('SERVER-STATE', true);
+        } catch (err) {
+            console.log(err.message)
+            showError(err.message)
+            win.webContents.send('SERVER-STATE', false);
+        }
+    })
 
     const showConfig = () =>{
         const dataSetting = getPreferences();
@@ -113,7 +123,11 @@ const createWindow = async() =>{
         return new Promise((resolve) => {
           setTimeout(resolve, ms);
         });
-      }
+    }
+
+    const showError = (note) =>{
+        win.webContents.send('SHOW-ERROR', note.slice(0, 32));
+    }
 }
 
 app.whenReady().then(()=>{

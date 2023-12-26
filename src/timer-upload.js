@@ -1,5 +1,5 @@
 const {getPreferences} = require('./configuration');
-const getFiles = require('./read_file');
+const {cekFiles} = require('./read_file');
 const config = require('./config');
 const axios = require('axios');
 
@@ -16,7 +16,7 @@ const executeUpload = async()=>{
         if(!configuration.outletCode || !configuration.serverIp){
             return;
         }
-        const files = await getFiles()
+        const files = await cekFiles()
         
         if(files.length<1){
             return;
@@ -37,7 +37,11 @@ const executeUpload = async()=>{
         }
             await axios.post(config.url, body,httpOptions)
             } catch (err) {
-            console.log(err);
+                console.log(JSON.stringify({
+                    name: err.name,
+                    message: err.message,
+                    stack: err.stack,
+                  }))
         }
     isProcess = false;
 };

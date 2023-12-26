@@ -141,10 +141,13 @@
         </div>
         <form>
             <label>IP Server</label>
-            <input style="width: 70%;" type="text" id="input_ip"><button class="check-btn", id="btn_check", onclick="">Check</button>
+            <input style="width: 70%;" type="text" id="input_ip"><button class="check-btn", id="btn_check", onclick="cekIp()">Check</button>
             <label>Outlet</label>
             <input type="text" id="input_outlet">
             <button type="button" class="button" onclick="saveConfig()">Simpan</button>
+            <div>
+                <p id="note" style="color: red;" onclick="hideError()"></p>
+            </div>
         </form>
     </div>
 </body>
@@ -154,21 +157,40 @@
 
     const ipField = document.getElementById("input_ip");
     const outletField = document.getElementById("input_outlet");
+    const btnCheck =  document.getElementById("btn_check");
+    const txtNote = document.getElementById("note");
+    txtNote.style.display = "none";
 
     ipcRenderer.on('SHOW-SETTING', (event, data)=>{
         ipField.value = data.ip,
         outletField.value = data.outlet
     });
 
+    ipcRenderer.on('SERVER-STATE', (event, data)=>{
+        if(data == true){
+            btnCheck.style.backgroundColor = 'green';
+        }else{
+            btnCheck.style.backgroundColor = 'red';
+        }
+    })
+
+    ipcRenderer.on('SHOW-ERROR', (event, data)=>{
+        txtNote.style.display = "block";
+        txtNote.innerHTML = data;
+    });
+
+    const hideError = () =>{
+        txtNote.style.display = "none";
+    }
+
     const saveConfig = () =>{
-        ipcRenderer.send('SEND-CONFIG', {
-            ipAddress: ipField.value,
-            outletCode: outletField.value,
-        });
+        txtNote.style.display = "none";
+        ipcRenderer.send('SEND-CONFIG', outletField.value);
     }
 
     const cekIp = ()=>{
-        ipcRenderer.send('CEK-IP', ipField.value);
+        txtNote.style.display = "none";
+        ipcRenderer.send('SERVER-CHECK', ipField.value);
     }
 
 </script>

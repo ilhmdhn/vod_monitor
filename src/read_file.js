@@ -1,98 +1,216 @@
 const fs = require('fs').promises;
 const path = require('path');
-const {getPreferences} = require('./configuration');
-const smb2 = require('smb2');
+const {getPreferences, setServer} = require('./configuration');
 
 const cekFiles = () => {
-  return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject)=>{
+        try {
+            const preferences = getPreferences()
+            const folderPath = `\\\\${preferences.serverIp}\\vod\\RoomInfo`;  
+            const files = await fs.readdir(folderPath);
+            const fileInfo = [];
+        
+            // Filter file yang berakhiran .ini
+            const iniFiles = files.filter(file => path.extname(file) === '.ini');
+        
+            // Membaca isi setiap file .ini
+            for (const iniFile of iniFiles) {
+              const filePath = path.join(folderPath, iniFile);
+              const fileProperty={
+                  name: null,
+                  date_modified: null,
+                  detail: {
+                      room_no: null,
+                      outlet: null,
+                      file_name: null,
+                      date_modified: null,
+                      room_no: null,
+                      status: null,
+                      service: null,
+                      checkout: null,
+                      extend: null,
+                      ready: null,
+                      delay: null,
+                      service_time: null,
+                      room_open_time: null,
+                      room_close_time: null
+                  }
+                  }
+              
+              try {
+                const data = await fs.readFile(filePath, 'utf8');
+                const isiFile = convertDataFile(data)
+                
+                if(isiFile.roomNo){
+                  const detailFile = await fs.stat(filePath);
+                  fileProperty.name= iniFile;
+                  fileProperty.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+                  if(isiFile.RoomNo){
+                    fileProperty.detail.room_no= isiFile.RoomNo;
+                  }
+                  if(isiFile.Status){
+                    fileProperty.detail.status= isiFile.Status;
+                  }
+                  if(isiFile.Service){
+                    fileProperty.detail.service= isiFile.Service;
+                  }
+                  if(isiFile.Checkout){
+                    fileProperty.detail.checkout= isiFile.Checkout;
+                  }
+                  if(isiFile.Extend){
+                    fileProperty.detail.extend= isiFile.Extend;
+                  }
+                  if(isiFile.Ready){
+                    fileProperty.detail.ready= isiFile.Ready;
+                  }
+                  if(isiFile.Delay){
+                    fileProperty.detail.delay= isiFile.Delay;
+                  }
+                  if(isiFile.ServiceTime){
+                    fileProperty.detail.service_time= isiFile.ServiceTime;
+                  }
+                  if(isiFile.RoomOpenTime){
+                    fileProperty.detail.room_open_time = dateTimeConverter(isiFile.RoomOpenTime);
+                  }
+                  if(isiFile.RoomCloseTime){
+                    fileProperty.detail.room_close_time = dateTimeConverter(isiFile.RoomCloseTime);
+                  }
+
+                  fileProperty.detail.file_name = iniFile;
+                  fileProperty.detail.outlet = preferences.outletCode;
+                  fileProperty.detail.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+                  
+                  fileInfo.push(fileProperty)
+                }
+              } catch (err) {
+                reject({
+                  name: err.name,
+                  message: err.message,
+                  stack: err.stack,
+                })
+              }
+            }
+            
+      
+          resolve(fileInfo);
+          } catch (err) {
+            reject({
+              name: err.name,
+              message: err.message,
+              stack: err.stack,
+            })
+          }
+    });
+}
+
+const testServer = (ipAddress) =>{
+  return new Promise(async(resolve, reject)=>{
     try {
-      const preferences = getPreferences();
-      const smbOptions = {
-        share: `\\\\${preferences.serverIp}\\vod\\RoomInfo`,
-        username: 'your_username',
-        password: 'your_password',
-      };
-
-      const smbClient = new smb2(smbOptions);
-      const files = await smbClient.readdir(smbOptions.share);
-
+      const folderPath = `\\\\${ipAddress}\\vod\\RoomInfo`;  
+      const files = await fs.readdir(folderPath);
       const fileInfo = [];
-
+  
       // Filter file yang berakhiran .ini
-      const iniFiles = files.filter((file) => path.extname(file.filename) === '.ini');
-
+      const iniFiles = files.filter(file => path.extname(file) === '.ini');
+  
       // Membaca isi setiap file .ini
       for (const iniFile of iniFiles) {
-        const filePath = path.join(smbOptions.share, iniFile.filename);
-        const fileProperty = {
-          name: iniFile.filename,
-          date_modified: null,
-          detail: {
-            room_no: null,
-            outlet: preferences.outletCode,
-            file_name: iniFile.filename,
+        const filePath = path.join(folderPath, iniFile);
+        const fileProperty={
+            name: null,
             date_modified: null,
-            status: null,
-            service: null,
-            checkout: null,
-            extend: null,
-            ready: null,
-            delay: null,
-            service_time: null,
-            room_open_time: null,
-            room_close_time: null,
-          },
-        };
-
+            detail: {
+                room_no: null,
+                outlet: null,
+                file_name: null,
+                date_modified: null,
+                room_no: null,
+                status: null,
+                service: null,
+                checkout: null,
+                extend: null,
+                ready: null,
+                delay: null,
+                service_time: null,
+                room_open_time: null,
+                room_close_time: null
+            }
+            }
+        
         try {
-          const detailFile = await smbClient.stat(filePath);
-          fileProperty.date_modified = detailFile.mtime.toISOString().slice(0, 19).replace('T', ' ');
+          const data = await fs.readFile(filePath, 'utf8');
+          const isiFile = convertDataFile(data)
 
-          const isiFile = convertDataFile(await smbClient.readFile(filePath, 'utf8'));
+          if(isiFile.RoomNo){
+            const detailFile = await fs.stat(filePath);
+            fileProperty.name= iniFile;
+            fileProperty.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+            if(isiFile.RoomNo){
+              fileProperty.detail.room_no= isiFile.RoomNo;
+            }
+            if(isiFile.Status){
+              fileProperty.detail.status= isiFile.Status;
+            }
+            if(isiFile.Service){
+              fileProperty.detail.service= isiFile.Service;
+            }
+            if(isiFile.Checkout){
+              fileProperty.detail.checkout= isiFile.Checkout;
+            }
+            if(isiFile.Extend){
+              fileProperty.detail.extend= isiFile.Extend;
+            }
+            if(isiFile.Ready){
+              fileProperty.detail.ready= isiFile.Ready;
+            }
+            if(isiFile.Delay){
+              fileProperty.detail.delay= isiFile.Delay;
+            }
+            if(isiFile.ServiceTime){
+              fileProperty.detail.service_time= isiFile.ServiceTime;
+            }
+            if(isiFile.RoomOpenTime){
+              fileProperty.detail.room_open_time = dateTimeConverter(isiFile.RoomOpenTime);
+            }
+            if(isiFile.RoomCloseTime){
+              fileProperty.detail.room_close_time = dateTimeConverter(isiFile.RoomCloseTime);
+            }
 
-          // Fungsi untuk mengonversi tanggal dan waktu
-          // const dateTimeConverter = (dateTimeString) => {
-          //   // Tambahkan logika konversi sesuai kebutuhan
-          //   return dateTimeString; // Contoh: kembalikan string datetime tanpa perubahan
-          // };
-
-          fileProperty.detail = {
-            ...fileProperty.detail,
-            room_no: isiFile.RoomNo || null,
-            status: isiFile.Status || null,
-            service: isiFile.Service || null,
-            checkout: isiFile.Checkout || null,
-            extend: isiFile.Extend || null,
-            ready: isiFile.Ready || null,
-            delay: isiFile.Delay || null,
-            service_time: isiFile.ServiceTime || null,
-            room_open_time: dateTimeConverter(isiFile.RoomOpenTime) || null,
-            room_close_time: dateTimeConverter(isiFile.RoomCloseTime) || null,
-          };
-          if(fileProperty.detail.room_no){
-            fileInfo.push(fileProperty);
+            fileProperty.detail.file_name = iniFile;
+            fileProperty.detail.outlet = 'HP000';
+            fileProperty.detail.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+            
+            fileInfo.push(fileProperty)
           }
         } catch (err) {
           reject({
-            'Name': err.name,
-            'Messagge': err.message,
-            'Stack': err.stack,
-          });
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+          })
         }
       }
+      
+    if(fileInfo.length>0){
+      setServer(ipAddress)
+      resolve(true);
+    }else{
+      throw {
+        name: 'IP Server salah',
+        message: 'Video player tidak terdeteksi',
+        stack: '',
+      }
+    }
 
-      smbClient.close(); // Tutup koneksi setelah selesai
-
-      resolve(fileInfo);
     } catch (err) {
       reject({
-        'Name': err.name,
-        'Messagge': err.message,
-        'Stack': err.stack,
-      });
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      })
     }
   });
-};
+}
 
 const convertDataFile = (files) => {
     try {
@@ -134,10 +252,10 @@ const convertDataFile = (files) => {
   
       return result;
     } catch (err) {
-      reject({
-        'Name': err.name,
-        'Messagge': err.message,
-        'Stack': err.stack,
+      throw ({
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
       });
     }
   }
@@ -155,4 +273,7 @@ const convertDataFile = (files) => {
 
 //  cekFiles('192.168.1.11');
 
- module.exports = cekFiles;
+ module.exports = {
+  cekFiles,
+  testServer
+};
