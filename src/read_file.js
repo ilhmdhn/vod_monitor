@@ -45,6 +45,7 @@ const cekFiles = () => {
                   const detailFile = await fs.stat(filePath);
                   fileProperty.name= iniFile;
                   fileProperty.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+
                   if(isiFile.RoomNo){
                     fileProperty.detail.room_no= isiFile.RoomNo;
                   }
