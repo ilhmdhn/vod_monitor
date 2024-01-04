@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "electron-builder"
   },
   "build": {
     "appId": "com.ihp.song_optimizer",
@@ -31,6 +32,7 @@
   "dependencies": {
     "axios": "^1.6.2",
     "electron-store": "^8.1.0",
+    "moment": "^2.30.1",
     "smb2": "^0.2.11"
   },
   "devDependencies": {

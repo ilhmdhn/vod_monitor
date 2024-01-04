@@ -1,6 +1,6 @@
 const { app, BrowserWindow, Tray, ipcMain, Menu } = require('electron');
 const {setOutlet, getPreferences} = require('./src/configuration');
-const startUpload = require('./src/timer-upload');
+const {startUpload, executeUpload} = require('./src/timer-upload');
 const {testServer} =require('./src/read_file');
 const path = require('path')
 
@@ -83,6 +83,7 @@ const createWindow = async() =>{
 
     tray.setTitle("Song Optimizer");
     tray.setContextMenu(contextMenu);
+
     startUpload()
 
     win.webContents.on('did-finish-load', ()=>{
@@ -97,15 +98,14 @@ const createWindow = async() =>{
         });
         await sleep(1000);
         showConfig()
+        executeUpload()
     });
 
     ipcMain.on('SERVER-CHECK', async(event, ipAddress)=>{
         try {
-            console.log(ipAddress)
             await testServer(ipAddress)
             win.webContents.send('SERVER-STATE', true);
         } catch (err) {
-            console.log(err.message)
             showError(err.message)
             win.webContents.send('SERVER-STATE', false);
         }

@@ -6,18 +6,13 @@ const axios = require('axios');
 let isProcess = false;
 
 const executeUpload = async()=>{
-    if(isProcess){
-        return;
-    }
-    isProcess = true;
-
     try {
+        isProcess = true;
         const configuration = getPreferences()
         if(!configuration.outletCode || !configuration.serverIp){
             return;
         }
         const files = await cekFiles()
-        
         if(files.length<1){
             return;
         }
@@ -35,15 +30,17 @@ const executeUpload = async()=>{
                 'authorization': config.auth
             },
         }
-            await axios.post(config.url, body,httpOptions)
-            } catch (err) {
-                console.log(JSON.stringify({
-                    name: err.name,
-                    message: err.message,
-                    stack: err.stack,
-                  }))
-        }
-    isProcess = false;
+        await axios.post(config.url, body,httpOptions)
+    
+    } catch (err) {
+        console.log(JSON.stringify({
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+        }))
+    }finally{
+        isProcess = false;
+    }
 };
 
 const startUpload = () =>{
@@ -52,7 +49,10 @@ const startUpload = () =>{
         if(!isProcess){
             executeUpload()
         }
-    }, 3600000)
+    }, 5000)
 }
-
-module.exports = startUpload;
+//3600000
+module.exports = {
+    startUpload,
+    executeUpload
+};

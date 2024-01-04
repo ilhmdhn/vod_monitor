@@ -1,10 +1,12 @@
 const fs = require('fs').promises;
 const path = require('path');
 const {getPreferences, setServer} = require('./configuration');
+const moment = require('moment')
 
 const cekFiles = () => {
     return new Promise(async (resolve, reject)=>{
         try {
+
             const preferences = getPreferences()
             const folderPath = `\\\\${preferences.serverIp}\\vod\\RoomInfo`;  
             const files = await fs.readdir(folderPath);
@@ -16,6 +18,7 @@ const cekFiles = () => {
             // Membaca isi setiap file .ini
             for (const iniFile of iniFiles) {
               const filePath = path.join(folderPath, iniFile);
+
               const fileProperty={
                   name: null,
                   date_modified: null,
@@ -40,11 +43,13 @@ const cekFiles = () => {
               try {
                 const data = await fs.readFile(filePath, 'utf8');
                 const isiFile = convertDataFile(data)
-                
-                if(isiFile.roomNo){
+                if(isiFile.RoomNo && isiFile.RoomOpenTime){
                   const detailFile = await fs.stat(filePath);
                   fileProperty.name= iniFile;
-                  fileProperty.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+
+                  const dateModified = moment(detailFile.mtime).format('YYYY-MM-DD HH:mm:ss');
+
+                  fileProperty.date_modified = dateModified;
 
                   if(isiFile.RoomNo){
                     fileProperty.detail.room_no= isiFile.RoomNo;
@@ -79,7 +84,7 @@ const cekFiles = () => {
 
                   fileProperty.detail.file_name = iniFile;
                   fileProperty.detail.outlet = preferences.outletCode;
-                  fileProperty.detail.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+                  fileProperty.detail.date_modified = dateModified;
                   
                   fileInfo.push(fileProperty)
                 }
@@ -90,6 +95,7 @@ const cekFiles = () => {
                   stack: err.stack,
                 })
               }
+
             }
             
       
@@ -108,7 +114,8 @@ const testServer = (ipAddress) =>{
   return new Promise(async(resolve, reject)=>{
     try {
       const folderPath = `\\\\${ipAddress}\\vod\\RoomInfo`;  
-      const files = await fs.readdir(folderPath);
+      // const files = await fs.readdir(folderPath);
+      const files = await readdirWithTimeout(folderPath, 15000);
       const fileInfo = [];
   
       // Filter file yang berakhiran .ini
@@ -145,7 +152,8 @@ const testServer = (ipAddress) =>{
           if(isiFile.RoomNo){
             const detailFile = await fs.stat(filePath);
             fileProperty.name= iniFile;
-            fileProperty.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+            const dateModified = moment(detailFile.mtime).format('YYYY-MM-DD HH:mm:ss');
+            fileProperty.date_modified = dateModified;
             if(isiFile.RoomNo){
               fileProperty.detail.room_no= isiFile.RoomNo;
             }
@@ -179,7 +187,7 @@ const testServer = (ipAddress) =>{
 
             fileProperty.detail.file_name = iniFile;
             fileProperty.detail.outlet = 'HP000';
-            fileProperty.detail.date_modified = (detailFile.mtime).toISOString().slice(0, 19).replace('T', ' ');
+            fileProperty.detail.date_modified = dateModified;
             
             fileInfo.push(fileProperty)
           }
@@ -222,17 +230,14 @@ const convertDataFile = (files) => {
       const lines = files.match(/[^\r\n]+/g);
   
       lines.forEach(line => {
-        // console.log('Processing line:', line);
   
         if (line.trim() === '' || line.trim().startsWith(';')) {
-        //   console.log('Skipping empty or comment line:', line);
           return;
         }
   
         const sectionMatch = line.match(/^\[(\w+)\]$/);
         if (sectionMatch) {
           currentSection = sectionMatch[1];
-        //   console.log('Entering section:', currentSection);
           return;
         }
   
@@ -242,9 +247,7 @@ const convertDataFile = (files) => {
             const key = parts[0].trim();
             const value = parts[1].trim();
   
-            // Mengatasi nilai yang tidak diisi dengan memberikan nilai default
             result[key] = value === '' ? null : value;
-            // console.log(`Setting ${key}=${result[key]}`);
           } else {
             console.warn(`Invalid line in [${currentSection}] section: ${line}`);
           }
@@ -272,7 +275,14 @@ const convertDataFile = (files) => {
       
   }
 
-//  cekFiles('192.168.1.11');
+  const readdirWithTimeout = async (folderPath, timeout) => {
+    return Promise.race([
+      fs.readdir(folderPath),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Readdir operation timed out')), timeout)
+      ),
+    ]);
+  };
 
  module.exports = {
   cekFiles,
