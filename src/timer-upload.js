@@ -49,9 +49,8 @@ const startUpload = () =>{
         if(!isProcess){
             executeUpload()
         }
-    }, 5000)
+    }, 3600000)
 }
-//3600000
 module.exports = {
     startUpload,
     executeUpload
