@@ -8,7 +8,7 @@ const cekFiles = () => {
         try {
 
             const preferences = getPreferences()
-            const folderPath = `\\\\${preferences.serverIp}\\vod\\RoomInfo`;  
+            const folderPath = `\\\\${preferences.serverIp}\\shine\\RoomInfo`;  
             const files = await fs.readdir(folderPath);
             const fileInfo = [];
         
@@ -113,7 +113,7 @@ const cekFiles = () => {
 const testServer = (ipAddress) =>{
   return new Promise(async(resolve, reject)=>{
     try {
-      const folderPath = `\\\\${ipAddress}\\vod\\RoomInfo`;  
+      const folderPath = `\\\\${ipAddress}\\shine\\RoomInfo`;  
       // const files = await fs.readdir(folderPath);
       const files = await readdirWithTimeout(folderPath, 15000);
       const fileInfo = [];
