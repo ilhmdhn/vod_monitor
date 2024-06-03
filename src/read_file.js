@@ -8,7 +8,7 @@ const cekFiles = () => {
         try {
 
             const preferences = getPreferences()
-            const folderPath = `\\\\${preferences.serverIp}\\shine\\RoomInfo`;  
+            const folderPath = `\\\\${preferences.serverIp}\\vod\\RoomInfo`;  
             const files = await fs.readdir(folderPath);
             const fileInfo = [];
         
@@ -113,7 +113,8 @@ const cekFiles = () => {
 const testServer = (ipAddress) =>{
   return new Promise(async(resolve, reject)=>{
     try {
-      const folderPath = `\\\\${ipAddress}\\shine\\RoomInfo`;  
+      const folderPath = `\\\\${ipAddress}\\vod\\RoomInfo`;  
+      // const folderPath = `\\\\${ipAddress}\\shine\\RoomInfo`;  
       // const files = await fs.readdir(folderPath);
       const files = await readdirWithTimeout(folderPath, 15000);
       const fileInfo = [];
@@ -193,9 +194,9 @@ const testServer = (ipAddress) =>{
           }
         } catch (err) {
           reject({
-            name: err.name,
-            message: err.message,
-            stack: err.stack,
+            name: 'IP Server salah',
+            message: 'ip server salah',
+            stack: '',
           })
         }
       }
@@ -205,17 +206,17 @@ const testServer = (ipAddress) =>{
       resolve(true);
     }else{
       throw {
-        name: 'IP Server salah',
-        message: 'Video player tidak terdeteksi',
+        name: 'IP Server salah2',
+        message: 'IP Server Salah',
         stack: '',
       }
     }
 
     } catch (err) {
       reject({
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
+        name: 'IP Server salah3',
+        message: 'IP Server Salah',
+        stack: '',
       })
     }
   });

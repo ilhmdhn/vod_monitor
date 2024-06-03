@@ -141,10 +141,10 @@
         </div>
         <form>
             <label>IP Server</label>
-            <input style="width: 70%;" type="text" id="input_ip"><button class="check-btn", id="btn_check", onclick="cekIp()">Check</button>
+            <input style="width: 70%;" type="text" id="input_ip"><button class="check-btn", id="btn_check", onclick="cekIp()" type="button">Check</button>
             <label>Outlet</label>
             <input type="text" id="input_outlet">
-            <button type="button" class="button" onclick="saveConfig()">Simpan</button>
+            <button type="submit" class="button" onclick="saveConfig()">Simpan</button>
             <div>
                 <p id="note" style="color: red;" onclick="hideError()"></p>
             </div>

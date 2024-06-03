@@ -19,7 +19,7 @@ const executeUpload = async()=>{
             
         const body = JSON.stringify({
             outlet: configuration.outletCode,
-            version: '1.0.0',
+            version: '240401',
             file: files
         });
     

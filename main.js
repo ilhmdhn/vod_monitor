@@ -11,7 +11,7 @@ const createWindow = async() =>{
     const win = new BrowserWindow({
         width: 544,
         height: 540,
-        show: true,
+        show: false,
         icon: path.join(__dirname, '/page/music.png'),
         title: "Song Optimizer",
         autoHideMenuBar: true,
